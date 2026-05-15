@@ -1,0 +1,523 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Syne:wght@400;500;600;700;800&display=swap');
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary: #00E5A0;
+  --danger: #FF4D6D;
+  --warn: #FFB830;
+  --info: #4DA8FF;
+  --bg: #0A0F1A;
+  --card: #111827;
+  --card2: #161F30;
+  --border: rgba(255,255,255,0.06);
+  --text: #E8EDF5;
+  --muted: #6B7A99;
+  --mono: 'DM Mono', monospace;
+  --display: 'Syne', sans-serif;
+}
+
+body { background: var(--bg); color: var(--text); font-family: var(--mono); min-height: 100vh; }
+
+.shell {
+  padding: 1.5rem;
+  display: grid;
+  gap: 1rem;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.topbar h1 {
+  font-family: var(--display);
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.status-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(0,229,160,0.08);
+  border: 0.5px solid rgba(0,229,160,0.25);
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  color: var(--primary);
+}
+
+.pulse-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--primary);
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.8); }
+}
+
+.vitals-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.vital-card {
+  background: var(--card);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+
+.vital-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 12px 12px 0 0;
+}
+
+.vital-card.ok::before { background: var(--primary); }
+.vital-card.warn::before { background: var(--warn); }
+.vital-card.danger::before { background: var(--danger); }
+.vital-card.info::before { background: var(--info); }
+
+.vital-label {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.5rem;
+  font-family: var(--mono);
+}
+
+.vital-value {
+  font-family: var(--display);
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.vital-card.ok .vital-value { color: var(--primary); }
+.vital-card.warn .vital-value { color: var(--warn); }
+.vital-card.danger .vital-value { color: var(--danger); }
+.vital-card.info .vital-value { color: var(--info); }
+
+.vital-unit {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.vital-status {
+  margin-top: 0.5rem;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+
+.vital-card.ok .vital-status { color: var(--primary); }
+.vital-card.warn .vital-status { color: var(--warn); }
+.vital-card.danger .vital-status { color: var(--danger); }
+.vital-card.info .vital-status { color: var(--info); }
+
+.main-row {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 0.75rem;
+}
+
+.card {
+  background: var(--card);
+  border: 0.5px solid var(--border);
+  border-radius: 12px;
+  padding: 1.25rem;
+}
+
+.card-label {
+  font-size: 9px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 1rem;
+}
+
+.ecg-canvas-wrap { width: 100%; height: 120px; }
+
+.anomaly-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.anomaly-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 0.6rem 0.75rem;
+  border-radius: 8px;
+  background: var(--card2);
+  border: 0.5px solid var(--border);
+}
+
+.anomaly-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+.anomaly-dot.high { background: var(--danger); box-shadow: 0 0 6px rgba(255,77,109,0.5); }
+.anomaly-dot.med { background: var(--warn); box-shadow: 0 0 6px rgba(255,184,48,0.5); }
+.anomaly-dot.low { background: var(--info); box-shadow: 0 0 6px rgba(77,168,255,0.4); }
+
+.anomaly-title { font-size: 12px; color: var(--text); margin-bottom: 2px; }
+.anomaly-time { font-size: 10px; color: var(--muted); }
+
+.bottom-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.mini-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.mini-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+}
+
+.mini-bar-label { color: var(--muted); width: 80px; flex-shrink: 0; }
+
+.mini-bar-track {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.mini-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 1s ease;
+}
+
+.mini-bar-val { width: 36px; text-align: right; }
+
+.health-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-ring-wrap {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  margin: 0.5rem auto;
+}
+
+.score-ring-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+
+.score-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.score-num {
+  font-family: var(--display);
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.score-sub { font-size: 10px; color: var(--muted); }
+
+.model-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(77,168,255,0.08);
+  border: 0.5px solid rgba(77,168,255,0.2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 10px;
+  color: var(--info);
+  margin-top: 0.5rem;
+  letter-spacing: 0.05em;
+}
+
+.algo-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 0.75rem;
+}
+
+.algo-tag {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.04);
+  border: 0.5px solid var(--border);
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+.report-btn {
+  margin-top: 1rem;
+  width: 100%;
+  background: rgba(0,229,160,0.08);
+  border: 0.5px solid rgba(0,229,160,0.3);
+  border-radius: 8px;
+  padding: 0.6rem;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--primary);
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: background 0.2s;
+}
+
+.report-btn:hover { background: rgba(0,229,160,0.15); }
+</style>
+
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Real-time health monitoring dashboard showing vitals, ECG waveform, anomaly detection alerts, and an overall health score of 82.</h2>
+
+<div class="shell">
+
+  <div class="topbar">
+    <h1>Health Monitor — Patient 0x7A3</h1>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div class="status-pill"><div class="pulse-dot"></div>Live Stream</div>
+      <div class="status-pill" style="color:var(--muted);border-color:var(--border);background:transparent;font-size:10px;">Last sync 2s ago</div>
+    </div>
+  </div>
+
+  <div class="vitals-grid">
+    <div class="vital-card ok">
+      <div class="vital-label">Heart Rate</div>
+      <div class="vital-value" id="hr">72</div>
+      <div class="vital-unit">bpm</div>
+      <div class="vital-status">▲ Normal range</div>
+    </div>
+    <div class="vital-card warn">
+      <div class="vital-label">SpO₂</div>
+      <div class="vital-value" id="spo2">93</div>
+      <div class="vital-unit">%</div>
+      <div class="vital-status">⚠ Below threshold</div>
+    </div>
+    <div class="vital-card info">
+      <div class="vital-label">Body Temp</div>
+      <div class="vital-value" id="temp">37.1</div>
+      <div class="vital-unit">°C</div>
+      <div class="vital-status">● Within normal</div>
+    </div>
+    <div class="vital-card danger">
+      <div class="vital-label">Blood Pressure</div>
+      <div class="vital-value" id="bp">148</div>
+      <div class="vital-unit">/ 92 mmHg</div>
+      <div class="vital-status">▲ Elevated — alert</div>
+    </div>
+  </div>
+
+  <div class="main-row">
+    <div class="card">
+      <div class="card-label">ECG Waveform — Real-time signal</div>
+      <div class="ecg-canvas-wrap">
+        <canvas id="ecgCanvas" width="640" height="120"></canvas>
+      </div>
+      <div style="display:flex;gap:1.5rem;margin-top:0.75rem;">
+        <div style="font-size:11px;color:var(--muted);">PR interval <span style="color:var(--text)">162ms</span></div>
+        <div style="font-size:11px;color:var(--muted);">QRS duration <span style="color:var(--text)">88ms</span></div>
+        <div style="font-size:11px;color:var(--muted);">QT/QTc <span style="color:var(--warn)">445ms ↑</span></div>
+        <div style="font-size:11px;color:var(--muted);">Rhythm <span style="color:var(--primary)">Sinus</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-label">Anomaly Detection</div>
+      <div class="anomaly-list">
+        <div class="anomaly-item">
+          <div class="anomaly-dot high"></div>
+          <div>
+            <div class="anomaly-title">Hypertensive Episode</div>
+            <div class="anomaly-time">14:32:07 — Confidence 96%</div>
+          </div>
+        </div>
+        <div class="anomaly-item">
+          <div class="anomaly-dot med"></div>
+          <div>
+            <div class="anomaly-title">SpO₂ Drop Detected</div>
+            <div class="anomaly-time">14:28:41 — Confidence 88%</div>
+          </div>
+        </div>
+        <div class="anomaly-item">
+          <div class="anomaly-dot med"></div>
+          <div>
+            <div class="anomaly-title">Prolonged QTc Interval</div>
+            <div class="anomaly-time">14:19:55 — Confidence 79%</div>
+          </div>
+        </div>
+        <div class="anomaly-item">
+          <div class="anomaly-dot low"></div>
+          <div>
+            <div class="anomaly-title">Activity Spike (Resting)</div>
+            <div class="anomaly-time">14:11:03 — Confidence 61%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bottom-row">
+    <div class="card">
+      <div class="card-label">Feature Extraction — ML pipeline</div>
+      <div class="mini-bars">
+        <div class="mini-bar-row">
+          <div class="mini-bar-label">HRV index</div>
+          <div class="mini-bar-track"><div class="mini-bar-fill" style="width:34%;background:var(--warn)"></div></div>
+          <div class="mini-bar-val" style="color:var(--warn)">34</div>
+        </div>
+        <div class="mini-bar-row">
+          <div class="mini-bar-label">Resp. rate</div>
+          <div class="mini-bar-track"><div class="mini-bar-fill" style="width:72%;background:var(--primary)"></div></div>
+          <div class="mini-bar-val" style="color:var(--primary)">18/m</div>
+        </div>
+        <div class="mini-bar-row">
+          <div class="mini-bar-label">Step count</div>
+          <div class="mini-bar-track"><div class="mini-bar-fill" style="width:54%;background:var(--info)"></div></div>
+          <div class="mini-bar-val" style="color:var(--info)">6.2k</div>
+        </div>
+        <div class="mini-bar-row">
+          <div class="mini-bar-label">Sleep quality</div>
+          <div class="mini-bar-track"><div class="mini-bar-fill" style="width:61%;background:var(--info)"></div></div>
+          <div class="mini-bar-val" style="color:var(--info)">61%</div>
+        </div>
+        <div class="mini-bar-row">
+          <div class="mini-bar-label">Stress level</div>
+          <div class="mini-bar-track"><div class="mini-bar-fill" style="width:78%;background:var(--danger)"></div></div>
+          <div class="mini-bar-val" style="color:var(--danger)">High</div>
+        </div>
+      </div>
+      <div class="algo-tags">
+        <span class="algo-tag">Isolation Forest</span>
+        <span class="algo-tag">LSTM autoencoder</span>
+        <span class="algo-tag">Random Forest</span>
+        <span class="algo-tag">Wavelet transform</span>
+        <span class="algo-tag">PCA</span>
+      </div>
+    </div>
+
+    <div class="card health-score">
+      <div class="card-label" style="text-align:center">Personalized Health Score</div>
+      <div class="score-ring-wrap">
+        <svg viewBox="0 0 130 130">
+          <circle cx="65" cy="65" r="55" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
+          <circle cx="65" cy="65" r="55" fill="none" stroke="#00E5A0" stroke-width="10"
+            stroke-dasharray="345.4" stroke-dashoffset="62" stroke-linecap="round"/>
+        </svg>
+        <div class="score-center">
+          <div class="score-num">82</div>
+          <div class="score-sub">/ 100</div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);text-align:center">Model confidence: 91%</div>
+      <div class="model-badge">
+        <i class="ti ti-cpu" aria-hidden="true"></i>
+        Predictive ML — v2.4
+      </div>
+      <button class="report-btn" onclick="sendPrompt('Generate a detailed diagnostic report for this patient with recommendations')">
+        <i class="ti ti-file-text" style="font-size:13px;vertical-align:-1px;margin-right:5px" aria-hidden="true"></i>
+        Generate report ↗
+      </button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const canvas = document.getElementById('ecgCanvas');
+const ctx = canvas.getContext('2d');
+const W = canvas.width, H = canvas.height;
+let offset = 0;
+
+function ecgSample(t) {
+  const mod = t % (Math.PI * 2);
+  if (mod < 0.3) return Math.sin(mod * 10) * 8;
+  if (mod > 0.5 && mod < 0.65) return -Math.sin((mod - 0.5) * 20) * 6;
+  if (mod > 0.65 && mod < 0.8) return Math.sin((mod - 0.65) * 42) * 48;
+  if (mod > 0.8 && mod < 0.9) return -Math.sin((mod - 0.8) * 31) * 18;
+  if (mod > 0.9 && mod < 1.05) return Math.sin((mod - 0.9) * 21) * 12;
+  return 0;
+}
+
+function drawECG() {
+  ctx.clearRect(0, 0, W, H);
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 0.5;
+  for (let x = 0; x < W; x += 40) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 0; y < H; y += 30) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  ctx.beginPath();
+  ctx.strokeStyle = '#00E5A0';
+  ctx.lineWidth = 1.5;
+  ctx.shadowColor = '#00E5A0';
+  ctx.shadowBlur = 4;
+
+  for (let x = 0; x < W; x++) {
+    const t = (x + offset) * 0.045;
+    const y = H / 2 - ecgSample(t);
+    x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  offset += 2;
+  requestAnimationFrame(drawECG);
+}
+
+drawECG();
+
+const hrEl = document.getElementById('hr');
+const spo2El = document.getElementById('spo2');
+const tempEl = document.getElementById('temp');
+const bpEl = document.getElementById('bp');
+
+function jitter(val, range) {
+  return val + (Math.random() - 0.5) * range;
+}
+
+setInterval(() => {
+  hrEl.textContent = Math.round(jitter(72, 4));
+  spo2El.textContent = Math.round(jitter(93, 1.5));
+  tempEl.textContent = jitter(37.1, 0.15).toFixed(1);
+  bpEl.textContent = Math.round(jitter(148, 5));
+}, 2000);
+</script>
